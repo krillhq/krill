@@ -1,0 +1,12 @@
+{
+  "imports": {
+    "@supabase/functions-js": "jsr:@supabase/functions-js@^2",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@^2",
+    "@anthropic-ai/sdk": "npm:@anthropic-ai/sdk@0.135.0",
+    "@anthropic-ai/sdk/": "npm:/@anthropic-ai/sdk@0.135.0/",
+    "zod": "npm:zod@^4",
+    "octokit": "npm:octokit@^4",
+    "@octokit/webhooks-methods": "npm:@octokit/webhooks-methods@^5",
+    "@octokit/webhooks-types": "npm:@octokit/webhooks-types@^7"
+  }
+}

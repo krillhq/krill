@@ -1,0 +1,50 @@
+{
+  "name": "krill-rules",
+  "version": "0.2.0",
+  "description": "Discover the unwritten rules your code reviewers keep asking for, and write them into AGENTS.md / CLAUDE.md.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krillhq/krill.git",
+    "directory": "cli"
+  },
+  "homepage": "https://github.com/krillhq/krill#readme",
+  "bugs": "https://github.com/krillhq/krill/issues",
+  "keywords": [
+    "agents-md",
+    "claude-md",
+    "code-review",
+    "ai",
+    "claude",
+    "cursor",
+    "copilot",
+    "coding-standards"
+  ],
+  "type": "module",
+  "bin": {
+    "krill-rules": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/cli.js",
+    "test": "node test/run.mjs",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.3"
+  }
+}

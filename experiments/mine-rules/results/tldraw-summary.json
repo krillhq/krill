@@ -1,0 +1,1039 @@
+{
+  "summary": {
+    "repo": "tldraw/tldraw",
+    "model": "claude-haiku-5-5",
+    "cutoff": "2026-09-10T13:39:20Z",
+    "trainComments": 246,
+    "rulesLearned": 25,
+    "testPrs": 15,
+    "humanComments": 54,
+    "baseline": {
+      "recall": 0.18518518518518517,
+      "findings": 86,
+      "matched": 16
+    },
+    "krill": {
+      "recall": 0.24074074074074073,
+      "findings": 115,
+      "matched": 19
+    },
+    "costUsd": 0.26616500000000004
+  },
+  "rules": [
+    {
+      "title": "Choose names that state intent and mirror sibling conventions",
+      "rule": "Name new APIs, options, methods and variables for what they mean, following the pattern of their siblings (for example register next to addEditorEvent, onBeforeDuplicate next to onBeforeUpdate). Do not prefix protected members with an underscore, and avoid ambiguous labels such as alt for a mode.",
+      "why": "Misleading or inconsistent names such as _register, getRightClickLikeButton or enableKeyboardShortcuts versus areKeyboardShortcutsEnabled confuse downstream users and make the API harder to learn.",
+      "category": "api_design",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Avoid boolean or ambiguous positional options in new APIs when a named object or enum would make call sites clearer.",
+      "coverage_note": "AGENTS.md addresses clarity of API options but says nothing about naming new members after their siblings, avoiding underscore prefixes on protected members, or avoiding ambiguous mode labels such as alt.",
+      "prs": 7,
+      "reviewers": {
+        "kaneel": 3,
+        "mimecuvalo": 2,
+        "steveruizok": 2,
+        "max-drake": 1
+      },
+      "evidence": [
+        {
+          "pr": 9651,
+          "reviewer": "mimecuvalo",
+          "path": "packages/commenting/src/canvas/options.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9651#discussion_r3631038925",
+          "quote": "i think this set as a trio makes a lot of sense as far just enough options to make it work for folks. my quibble here would be `alt` is a weird naming for the middle state: maybe `allowable`/`optionable`/`switchable`? open to suggestions here and nit: i'd put `alt` in the middle …"
+        },
+        {
+          "pr": 9566,
+          "reviewer": "max-drake",
+          "path": "packages/editor/src/lib/editor/shapes/ShapeUtil.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9566#discussion_r3586399064",
+          "quote": "nit but should we call this `onBeforeDuplicate` to match `onBeforeUpdate` / `onBeforeCreate`? The jsdoc here uses the same \"provides a last chance to...\" verbiage as those two"
+        },
+        {
+          "pr": 9204,
+          "reviewer": "mimecuvalo",
+          "path": "packages/editor/src/lib/editor/managers/EditorManager.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9204#discussion_r3465757180",
+          "quote": "let's just call this `register` - `_register` makes it sound like it's `private` but it's actually `protected`. let's keep the naming consistent with how `addEditorEvent` below which is also protected isn't prefixed by `_`"
+        },
+        {
+          "pr": 9234,
+          "reviewer": "kaneel",
+          "path": "packages/editor/src/lib/utils/pointer.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9234#discussion_r3421697526",
+          "quote": "I'd pay attention to naming here and call it a \"secondary click\", because left handed mouse users are real too!"
+        },
+        {
+          "pr": 9234,
+          "reviewer": "kaneel",
+          "path": "packages/editor/src/lib/utils/pointer.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9234#discussion_r3421580544",
+          "quote": "`getRightClickLikeButton` seems a bit wrong as it returns the \"button\" value, getPointerEventButton may be better? and `e` should be PointerEvent as well"
+        },
+        {
+          "pr": 9224,
+          "reviewer": "steveruizok",
+          "path": "packages/tldraw/src/lib/ui/hooks/useClipboardEvents.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9224#discussion_r3419691425",
+          "quote": "This line (which should be renamed `editorIsFocused`) the safest guard against accidental canvas interactions, e.g. with keyboard shortcuts or modifiers). Managing the editor focus is semi-complicated though but most applications will need to do it eventually to prevent canvas kb…"
+        },
+        {
+          "pr": 9205,
+          "reviewer": "kaneel",
+          "path": "apps/dotcom/client/src/tla/components/TlaButton/TlaButton.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9205#discussion_r3414833541",
+          "quote": "`canvas` does not communicate the intent, could we think of a better name?"
+        },
+        {
+          "pr": 9091,
+          "reviewer": "steveruizok",
+          "path": "apps/docs/content/sdk-features/accessibility.mdx",
+          "url": "https://github.com/tldraw/tldraw/pull/9091#discussion_r3386349740",
+          "quote": "We should rename this to enableKeyboardShortcuts"
+        }
+      ]
+    },
+    {
+      "title": "Reuse existing helpers, constants and types instead of copying them",
+      "rule": "Import the existing helper, constant, route prefix, store prefix, list or query type from its owning module instead of copying it, redeclaring it, or hardcoding a literal that another module already defines.",
+      "why": "Reviewers repeatedly flagged duplicated test helpers, store prefixes, easing functions, route prefixes, lists that must stay in sync and hardcoded ids. Duplicates drift apart and fail silently.",
+      "category": "maintainability",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Use workspace types and helpers rather than duplicating definitions.",
+      "coverage_note": "AGENTS.md only asks to avoid duplicating definitions in general. It does not cover importing route prefixes, store prefixes, shared constants or query types, or replacing hand-rolled logic with existing editor helpers.",
+      "prs": 6,
+      "reviewers": {
+        "mimecuvalo": 3,
+        "AniKrisn": 1,
+        "frolic": 1,
+        "kostyafarber": 1
+      },
+      "evidence": [
+        {
+          "pr": 9803,
+          "reviewer": "mimecuvalo",
+          "path": "packages/commenting/src/clustering/screen-offsets.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9803#discussion_r3691131241",
+          "quote": "nit, this `mulberry32` is getting duplicated a lot - time for a shared testing fn :)"
+        },
+        {
+          "pr": 9588,
+          "reviewer": "AniKrisn",
+          "path": "apps/examples/src/examples/ui/add-connected-shape/AddConnectedShapeExample.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9588#discussion_r3601741577",
+          "quote": "we could use editor.getShapeStyleIfExists here"
+        },
+        {
+          "pr": 9423,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/scripts/build.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9423#discussion_r3588441151",
+          "quote": "to be pedantic about it, let's use dotcom-shared/routes.ts for the prefixes here"
+        },
+        {
+          "pr": 9328,
+          "reviewer": "frolic",
+          "path": "apps/dotcom/client/src/tla/app/TldrawApp.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9328#discussion_r3441608379",
+          "quote": "Is there not some query type or something somewhere that we can lift out instead of defining this here? Feels like we're having to keep this aligned with a query result type that probably lives somewhere?"
+        },
+        {
+          "pr": 9154,
+          "reviewer": "mimecuvalo",
+          "path": "packages/editor/src/lib/primitives/Vec.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9154#discussion_r3421097706",
+          "quote": "hm, why copy out the fns from `easings.ts`? doesn't seem useful to duplicate?"
+        },
+        {
+          "pr": 9231,
+          "reviewer": "kostyafarber",
+          "path": "apps/dotcom/client/src/tla/layouts/TlaSidebarLayout/TlaSidebarLayout.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9231#discussion_r3420251131",
+          "quote": "i would of made this a constant somewhere, if this has to match cross file, instead of the magic string"
+        }
+      ]
+    },
+    {
+      "title": "Keep comments and docs describing the current code",
+      "rule": "Update or delete stale comments and docs when the code changes. Do not narrate removed or previous implementations inside code comments.",
+      "why": "Comments that reference old behavior, returned values that no longer exist, or legacy paths mislead readers and rot quickly.",
+      "category": "documentation",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Leave an existing comment alone unless your change makes it inaccurate, you are rewriting the lines it is attached to, or the user asked for a cleanup.",
+      "coverage_note": "AGENTS.md tells agents to fix comments their change makes inaccurate, but it does not require removing narration of previous implementations or updating docs that describe removed behavior.",
+      "prs": 4,
+      "reviewers": {
+        "MitjaBezensek": 4
+      },
+      "evidence": [
+        {
+          "pr": 9807,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/sync-collaboration/src/comment-authorizers.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9807#discussion_r3704596846",
+          "quote": "Some stale comments in this file, here's one example."
+        },
+        {
+          "pr": 9708,
+          "reviewer": "MitjaBezensek",
+          "path": "apps/dotcom/sync-worker/src/TLFileDurableObject.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9708#discussion_r3665417036",
+          "quote": "Let's update the docs, don't think it's necessary to reference old implementations like we do with `only the handful that were given a roomId`. Same below with `used to write`."
+        },
+        {
+          "pr": 9503,
+          "reviewer": "MitjaBezensek",
+          "path": "apps/dotcom/browser-run-thumbnails.md",
+          "url": "https://github.com/tldraw/tldraw/pull/9503#discussion_r3620712758",
+          "quote": "Looks like we have some stale docs here (like `returned render URL` - we don't seem to return the URL any longer)."
+        },
+        {
+          "pr": 10391,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/dotcom-shared/src/queries.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10391#discussion_r3829809603",
+          "quote": "Some legacy comments here as well, maybe run a docs cleanup prompt across the whole app."
+        }
+      ]
+    },
+    {
+      "title": "Keep each PR to its stated purpose",
+      "rule": "Move unrelated fixes, extra features and cleanups into follow-up PRs, or drop them, instead of bundling them into the current change.",
+      "why": "Out-of-scope changes slow review and hide risk; reviewers asked for deferral or removal of unrelated parts repeatedly.",
+      "category": "maintainability",
+      "checkable_in_diff": false,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Keep changes scoped to the request and the affected package. Do not refactor unrelated code.",
+      "coverage_note": "AGENTS.md asks agents to keep changes scoped and to put comment cleanups in a separate PR, but it does not explicitly say to move extra features or unrelated fixes into follow-up PRs.",
+      "prs": 3,
+      "reviewers": {
+        "mimecuvalo": 2,
+        "steveruizok": 1,
+        "max-drake": 1
+      },
+      "evidence": [
+        {
+          "pr": 9644,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/zero-cache/migrations/043_add_comment_reactions.sql",
+          "url": "https://github.com/tldraw/tldraw/pull/9644#discussion_r3631973735",
+          "quote": "in a followup PR we should think about custom emojis :) at Paper we used Private Use Areas in Unicode: https://en.wikipedia.org/wiki/Private_Use_Areas so, it was: - a unicode character (privately assigned across a workspace) in the backend that would map to a URL, canonical name,…"
+        },
+        {
+          "pr": 9644,
+          "reviewer": "mimecuvalo",
+          "path": "packages/commenting/src/ui/comments.css",
+          "url": "https://github.com/tldraw/tldraw/pull/9644#discussion_r3631915887",
+          "quote": "not for this PR but we should clean up these pseudo-hover rules later cc @jsscclr"
+        },
+        {
+          "pr": 9227,
+          "reviewer": "steveruizok",
+          "path": "packages/tldraw/src/lib/bindings/arrow/ArrowBindingUtil.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9227#discussion_r3419732349",
+          "quote": "This is unrelated, we don't want to do this. If the arrow is parented to the frame then self-connecting arrows like this don't appear. <img width=\"381\" height=\"308\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/b46334ef-cf9e-4527-a60c-e1f869c76b0c\" />"
+        },
+        {
+          "pr": 9028,
+          "reviewer": "max-drake",
+          "path": "packages/tldraw/src/lib/ui/context/actions.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9028#discussion_r3373559248",
+          "quote": "I think for now, we should axe this part of the PR. the interaction of \"shape styles will be pasted on pointer down\" does not work I think (for a couple reasons) a couple alternatives that I think would be more focused 1. remove this action entirely 2. remove this action, and let…"
+        }
+      ]
+    },
+    {
+      "title": "Reuse existing UI primitives, icons and button variants",
+      "rule": "Use existing building blocks (tooltips, toasts, Radix icons, defined TlaButton variants and dialog buttons) instead of creating new UI components or custom styling for the same job.",
+      "why": "New components and custom styles add maintenance cost and visual inconsistency when the design system already covers the case.",
+      "category": "maintainability",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Follow existing component patterns in the relevant app or package.",
+      "coverage_note": "AGENTS.md only asks to follow existing component patterns. It does not name tooltips, Radix icons, toasts, TlaButton variants or dialog buttons as the required building blocks.",
+      "prs": 2,
+      "reviewers": {
+        "mimecuvalo": 4
+      },
+      "evidence": [
+        {
+          "pr": 9644,
+          "reviewer": "mimecuvalo",
+          "path": "packages/tldraw/src/lib/ui/components/primitives/TldrawUiHoverCard.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9644#discussion_r3632002922",
+          "quote": "given the prev. comment — i think we can get away with just a tooltip in this case and not have this new UI component 👍"
+        },
+        {
+          "pr": 9644,
+          "reviewer": "mimecuvalo",
+          "path": "packages/commenting/src/ui/reaction-picker.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9644#discussion_r3631987743",
+          "quote": "let's use the Radix icon here btw (that's what we use across the app) https://www.radix-ui.com/icons"
+        },
+        {
+          "pr": 9080,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/src/tla/components/dialogs/TlaInviteExpiredDialog.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9080#discussion_r3389728689",
+          "quote": "hm, i guess they can just close the dialog if they want to ignore this but since this auto-popups it feels like they're forced to hit OK? i'm actually wondering, since there's a new toast in this PR anyway, we could just add it as part of the toast which has an affordance to add …"
+        },
+        {
+          "pr": 9080,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/src/tla/components/dialogs/TlaInviteExpiredDialog.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9080#discussion_r3389710477",
+          "quote": "let's use one of the defined buttons in our instead of the custom styling"
+        }
+      ]
+    },
+    {
+      "title": "Restore global state in finally and use fixed dates in tests",
+      "rule": "Restore mutated globals, environment flags and fake timers in a finally block or afterEach, and use fixed dates instead of wall-clock values in tests.",
+      "why": "Tests that leak state or depend on the current date pass or fail depending on when or in what order they run.",
+      "category": "testing",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file gives guidance on restoring globals or fake timers in finally blocks or afterEach, or on using fixed dates in tests.",
+      "prs": 4,
+      "reviewers": {
+        "MitjaBezensek": 4
+      },
+      "evidence": [
+        {
+          "pr": 9706,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/editor/src/lib/license/LicenseManager.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9706#discussion_r3665204537",
+          "quote": "Won't this start failing once we are past the grandfathering date? Should probably use a fixed date here?"
+        },
+        {
+          "pr": 9552,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/editor/src/lib/license/LicenseManager.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9552#discussion_r3557706933",
+          "quote": "Put this in finally not to leak it if something goes wrong?"
+        },
+        {
+          "pr": 9384,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/editor/src/lib/license/LicenseManager.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9384#discussion_r3465728345",
+          "quote": "Should we do this in a `finally` block so that any potential exceptions in licensing code don't leak the `production` option."
+        },
+        {
+          "pr": 10049,
+          "reviewer": "MitjaBezensek",
+          "path": "apps/dotcom/sync-worker/src/routes/tla/sharedBoardScreenshotMcp.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10049#discussion_r3812780382",
+          "quote": "Think we should go back to real timers at the end. or all the tests will stay on the fake ones?"
+        }
+      ]
+    },
+    {
+      "title": "Prefer explicit code over clever code",
+      "rule": "Name intermediate booleans, use lookup maps instead of nested ternaries, and write plain if statements instead of dense filters or long conditional chains.",
+      "why": "Dense conditionals are hard to read and review, and reviewers asked for named variables and maps repeatedly.",
+      "category": "maintainability",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file asks for named intermediate booleans, lookup maps over nested ternaries, or plain if statements over dense filters.",
+      "prs": 4,
+      "reviewers": {
+        "jsscclr": 1,
+        "MitjaBezensek": 1,
+        "m31-galaxy": 1,
+        "kaneel": 1
+      },
+      "evidence": [
+        {
+          "pr": 9652,
+          "reviewer": "jsscclr",
+          "path": "packages/commenting/src/canvas/comments-overlay.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9652#discussion_r3644947398",
+          "quote": "little nit! my brain melts trying to read these kinds of conditionals - could we perhaps do something like this instead? ``` const canRenderComposer = canComment || options.components.ComposerFallback != null const showPendingComposer = pending != null && canRenderComposer ```"
+        },
+        {
+          "pr": 9473,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/dotcom-shared/src/mutators.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9473#discussion_r3551056507",
+          "quote": "Maybe something like this might be easier to understand: ```ts const alreadyLinkedInHome = await tx.run( zql.group_file.where('fileId', '=', fileId).where('groupId', '=', userId).one() ) if (!alreadyLinkedInHome) { const ownedByOneOfMyWorkspaces = (await getRole(tx, userId, file?…"
+        },
+        {
+          "pr": 10269,
+          "reviewer": "m31-galaxy",
+          "path": "apps/docs/components/content/code-files.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/10269#discussion_r3970203731",
+          "quote": "nit: perhaps this would be clearer as a map instead of a nested ternary? Also makes it more obvious that we're currently using typescript highlighter as a catch-all"
+        },
+        {
+          "pr": 10070,
+          "reviewer": "kaneel",
+          "path": "packages/tldraw/src/lib/ui/hooks/useKeyboardShortcuts.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10070#discussion_r3948892658",
+          "quote": "it does simplify and uses a \"smart\" filter here and because false is ignored, it kinda work well. I'd prefer it less smart. ```ts const mods: string[] = [] if (shift) mods.push('shift') if (alt) mods.push('alt') const rest = [...mods, k].join('+') return cmd ? `cmd+${rest},ctrl+$…"
+        }
+      ]
+    },
+    {
+      "title": "Write user-facing strings inline with defaultMessage",
+      "rule": "Write user-facing strings inline with the F component and defaultMessage next to where they render. Only move a string into a shared messages object when it is actually reused.",
+      "why": "Jumping between a messages object and the component adds cognitive load, and reviewers asked to revert such extractions.",
+      "category": "i18n",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "The documented files say nothing about the F component, defaultMessage placement or when to move strings into a shared messages object; they only require concise sentence-case UI text.",
+      "prs": 2,
+      "reviewers": {
+        "mimecuvalo": 2,
+        "frolic": 1
+      },
+      "evidence": [
+        {
+          "pr": 9300,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/src/tla/components/dialogs/WorkspaceSettingsDialog.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9300#discussion_r3435095473",
+          "quote": "i'm going to revert these parts — we should have the text close to where it's being used instead of the back & forth of extra cognitive load here"
+        },
+        {
+          "pr": 9300,
+          "reviewer": "frolic",
+          "path": "apps/dotcom/client/src/tla/components/dialogs/WorkspaceSettingsDialog.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9300#discussion_r3434848264",
+          "quote": "I thought the preference was to use `defaultMessage` here and not lift out of `messages` if the default is all we use? cc @mimecuvalo"
+        },
+        {
+          "pr": 9168,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/src/tla/components/dialogs/WorkspaceSettingsDialog.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9168#discussion_r3428213722",
+          "quote": "fwiw, you can just do `<F defaultMessage=\"Text\" />` — actually my preference would be to not put everything into a `messages` grabbag whenever possible so people don't have to jump back & forth a lot"
+        }
+      ]
+    },
+    {
+      "title": "Ship only the options that are needed now",
+      "rule": "Expose only the opinionated configuration that downstream users need today. Leave out extra knobs and exhaustive lists until real demand appears.",
+      "why": "Every option becomes a maintenance and support burden, and reviewers preferred adding options later based on actual feedback.",
+      "category": "api_design",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Keep public API changes deliberate and reflected in API reports.",
+      "coverage_note": "AGENTS.md asks for deliberate public API changes but does not tell agents to ship only the options needed now or to avoid exhaustive lists and extra knobs.",
+      "prs": 3,
+      "reviewers": {
+        "mimecuvalo": 2,
+        "MitjaBezensek": 1
+      },
+      "evidence": [
+        {
+          "pr": 9674,
+          "reviewer": "mimecuvalo",
+          "path": "packages/commenting/src/canvas/options.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9674#discussion_r3645991834",
+          "quote": "let's land this PR but let's think about which options we can nix before shipping comments. i'd rather have less options going out the door and then we add options as we feel out what people are asking for. the bias here would be to have the opinionated choices for these i think …"
+        },
+        {
+          "pr": 9644,
+          "reviewer": "mimecuvalo",
+          "path": "packages/commenting/src/canvas/options.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9644#discussion_r3631895690",
+          "quote": "eh, i don't think we need this as an option, let's nix it. my bias would be to reduce the amount of options as much as possible until there's maybe a need for it downstream"
+        },
+        {
+          "pr": 9067,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/dotcom-shared/src/capabilities.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9067#discussion_r3378985540",
+          "quote": "I wonder if this should be an exhaustive list or not. Like should we include `rotateInviteLink` even though everyone can do it right now. I'd say probably not, we can add those once we need them."
+        }
+      ]
+    },
+    {
+      "title": "Use generic names and general patterns instead of curated lists",
+      "rule": "Use generic resource names and general matching patterns (for example matching any user agent containing bot) instead of hardcoded curated lists or project-specific identifiers.",
+      "why": "Curated lists go stale and become inconsistent, and specific names tie reusable infrastructure to one product.",
+      "category": "maintainability",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file asks for generic resource names or general matching patterns instead of curated lists or project-specific identifiers.",
+      "prs": 2,
+      "reviewers": {
+        "mimecuvalo": 2,
+        "driev": 1
+      },
+      "evidence": [
+        {
+          "pr": 9667,
+          "reviewer": "driev",
+          "path": "apps/dotcom/sync-worker/wrangler.toml",
+          "url": "https://github.com/tldraw/tldraw/pull/9667#discussion_r3702854119",
+          "quote": "Make this generic - `dotcom-mcp-data` or something."
+        },
+        {
+          "pr": 9423,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/scripts/build.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9423#discussion_r3588464259",
+          "quote": "i had a comment here that i think got lost in the shuffle: this curated list is fine but i think i'd also go for something more generic, even just looking for the word 'bot'. this list will get away from us and become inconsistent about which bots are getting the social previews.…"
+        },
+        {
+          "pr": 9423,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/scripts/build.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9423#discussion_r3506603491",
+          "quote": "i'd love to have our unfurl bot work with this as well. you should just look for the keyword `bot` in general"
+        }
+      ]
+    },
+    {
+      "title": "Write assertions that fail on the regression itself",
+      "rule": "Assert exact outputs such as lengths or shapes, check behavior after a recovery or reconnect, and drive the real trigger rather than a simulation that does not reproduce the bug.",
+      "why": "Weak assertions or simulations that do not reproduce the bug let regressions pass unnoticed.",
+      "category": "testing",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Prefer comparing whole objects in assertions when that gives a clearer failure than checking fields one by one.",
+      "coverage_note": "AGENTS.md only addresses assertion style. It does not require exact output checks, behavior after reconnect, or driving the real trigger rather than a simulation.",
+      "prs": 3,
+      "reviewers": {
+        "MitjaBezensek": 2,
+        "mimecuvalo": 1
+      },
+      "evidence": [
+        {
+          "pr": 9001,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/editor/src/lib/primitives/intersect.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9001#discussion_r3512975987",
+          "quote": "Would this catch a regression? Think adding `expect(result!.length).toBe(8)` (or something like that) would help to make sure we do."
+        },
+        {
+          "pr": 9380,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/sync-core/src/lib/ClientWebSocketAdapter.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9380#discussion_r3466834693",
+          "quote": "Should we also check that we can correctly receive messages after the reconnect?"
+        },
+        {
+          "pr": 9964,
+          "reviewer": "mimecuvalo",
+          "path": "packages/sync-core/src/lib/TLSyncClient.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9964#discussion_r3758906301",
+          "quote": "### The throttling test doesn't simulate throttling — TLSyncClient.test.ts:643 (medium) vi.setSystemTime shifts every pending timer's createdAt/callAt by the same delta to keep them stable, so the ping still fires 5s later and the health check 10s later from the callbacks' own pe…"
+        }
+      ]
+    },
+    {
+      "title": "Wrap host callbacks and new fallible calls in try/catch",
+      "rule": "Wrap host-supplied callbacks and newly fallible calls in try/catch so an exception cannot skip the code that runs after them.",
+      "why": "An exception thrown by a host callback can abort the surrounding flow and leave state half-updated.",
+      "category": "api_design",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file asks to wrap host callbacks or newly fallible calls in try/catch.",
+      "prs": 3,
+      "reviewers": {
+        "MitjaBezensek": 2,
+        "mimecuvalo": 1
+      },
+      "evidence": [
+        {
+          "pr": 9807,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/commenting/src/canvas/options.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9807#discussion_r3704587589",
+          "quote": "Should we be defensive here as well and run this in a try catc?"
+        },
+        {
+          "pr": 9812,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/commenting/src/canvas/pending-composer.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9812#discussion_r3704508820",
+          "quote": "Should we guard against any errors / exceptions in this callbacks? just to make sure we don't skip the lines after this?"
+        },
+        {
+          "pr": 9917,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/sync-worker/src/welcome/resolveWelcomeSnapshot.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9917#discussion_r3756703701",
+          "quote": "add a try/catch here — this can fail now where before it couldn't"
+        }
+      ]
+    },
+    {
+      "title": "Model alternative states as discriminated unions",
+      "rule": "Model alternative states as discriminated unions and switch over them exhaustively, so impossible states cannot be represented and new variants fail to compile.",
+      "why": "Loose optional fields and string flags allow invalid combinations, and reviewers asked for unions and exhaustive switches repeatedly.",
+      "category": "maintainability",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file asks to model alternative states as discriminated unions or to switch over them exhaustively.",
+      "prs": 3,
+      "reviewers": {
+        "MitjaBezensek": 3
+      },
+      "evidence": [
+        {
+          "pr": 9503,
+          "reviewer": "MitjaBezensek",
+          "path": "apps/dotcom/sync-worker/src/worker.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9503#discussion_r3620701741",
+          "quote": "Should we do an exhaustive switch based on the type here? It also got me thinking if we should use a separate queue for this? Not really sure 🤷‍♂️"
+        },
+        {
+          "pr": 10615,
+          "reviewer": "MitjaBezensek",
+          "path": "apps/dotcom/sync-worker/src/types.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10615#discussion_r3949672791",
+          "quote": "Should we use a discriminated union here as well? ``` reason: KeyframeReason | 'delta' ```"
+        },
+        {
+          "pr": 10614,
+          "reviewer": "MitjaBezensek",
+          "path": "apps/dotcom/sync-worker/src/versionChainRead.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10614#discussion_r3934309917",
+          "quote": "Maybe a discriminated union of the options would be better here. There are some options that are not valid (like `keyframe` kind with `keyframeKey` of string. I like to make impossible states unrepresentable in code (if possible)."
+        }
+      ]
+    },
+    {
+      "title": "Report each distinct failure mode separately",
+      "rule": "Report each distinct failure mode with its own error or log reason and identifying key, instead of collapsing different causes into one generic message.",
+      "why": "Collapsed errors make it impossible to tell which failure happened in production logs.",
+      "category": "maintainability",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file asks to report distinct failure modes with separate reasons or identifying keys.",
+      "prs": 2,
+      "reviewers": {
+        "MitjaBezensek": 3
+      },
+      "evidence": [
+        {
+          "pr": 10720,
+          "reviewer": "MitjaBezensek",
+          "path": "internal/scripts/lib/flyDeployGate.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10720#discussion_r3976384655",
+          "quote": "Should we return and / or print a reason here? Like `no-machines | unstamped | mixed | unhealthy`. Might help debug."
+        },
+        {
+          "pr": 10615,
+          "reviewer": "MitjaBezensek",
+          "path": "apps/dotcom/sync-worker/src/TLFileDurableObject.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10615#discussion_r3955661109",
+          "quote": "Let's report different errors in this case, otherwise all these different cases collapse to the same log."
+        },
+        {
+          "pr": 10615,
+          "reviewer": "MitjaBezensek",
+          "path": "apps/dotcom/sync-worker/src/TLFileDurableObject.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10615#discussion_r3955633618",
+          "quote": "Should we report the segment key and a distinct recovery reason here? Just to keep track of this happening."
+        }
+      ]
+    },
+    {
+      "title": "Fail loudly on missing or invalid configuration",
+      "rule": "Fail loudly when required configuration is missing or invalid, and validate environment inputs, instead of silently skipping work or returning a green result.",
+      "why": "Silent skips hide misconfiguration and typos until they cause production problems.",
+      "category": "maintainability",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file requires failing loudly on missing or invalid configuration or validating environment inputs.",
+      "prs": 3,
+      "reviewers": {
+        "MitjaBezensek": 3
+      },
+      "evidence": [
+        {
+          "pr": 9539,
+          "reviewer": "MitjaBezensek",
+          "path": "skills/dotcom-release-crew/SKILL.md",
+          "url": "https://github.com/tldraw/tldraw/pull/9539#discussion_r3549900755",
+          "quote": "I guess this will result in a green run if the webhook url is not set? Should we actually fail the action?"
+        },
+        {
+          "pr": 10720,
+          "reviewer": "MitjaBezensek",
+          "path": "internal/scripts/deploy-dotcom.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10720#discussion_r3976369299",
+          "quote": "Should we assert that `ZERO_FORCE_DEPLOY` has a bool value? Just to discover a possible typo faster?"
+        },
+        {
+          "pr": 9702,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/worker-shared/src/sentry.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9702#discussion_r3802933145",
+          "quote": "Wasn't this loud failure better for detecting issues?"
+        }
+      ]
+    },
+    {
+      "title": "Skip work for changes that cannot affect the result",
+      "rule": "Early-return on changes that cannot affect the outcome, such as remote changes, and mark dirty or trigger side effects only for the fields that matter.",
+      "why": "Reprocessing irrelevant changes wastes performance, and broad invalidation gives back the gains of incremental updates.",
+      "category": "performance",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file asks to early-return on changes that cannot affect the outcome or to limit side effects to the fields that matter.",
+      "prs": 3,
+      "reviewers": {
+        "steveruizok": 2,
+        "MitjaBezensek": 1
+      },
+      "evidence": [
+        {
+          "pr": 9661,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/commenting/src/canvas/anchor-lifecycle.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9661#discussion_r3645529771",
+          "quote": "Should we do an early return here for remote changes, just like we do in some other handlers? Think we are only interested in the local ones here?"
+        },
+        {
+          "pr": 9093,
+          "reviewer": "steveruizok",
+          "path": "packages/editor/src/lib/editor/managers/SpatialIndexManager/SpatialIndexManager.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9093#discussion_r3504638742",
+          "quote": "This treats every shape update as a transform change, so prop-only updates to containers still walk and recheck the entire descendant subtree. For example, renaming/restyling/resizing a frame or group with many children will mark every child dirty even though their page transform…"
+        },
+        {
+          "pr": 9281,
+          "reviewer": "steveruizok",
+          "path": "packages/tldraw/src/lib/bindings/arrow/ArrowBindingUtil.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9281#discussion_r3452269873",
+          "quote": "I might make this a side effect when the geo shape's geo property changes? Doesn't seem like something we would want to check on every change."
+        }
+      ]
+    },
+    {
+      "title": "Explain where tuning numbers come from",
+      "rule": "Add a comment explaining the origin of tuning numbers, timeouts and z-index values, and group interdependent constants so their relationship is visible.",
+      "why": "Unexplained magic numbers are hard to tune safely, and reviewers repeatedly asked where values came from.",
+      "category": "documentation",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Always keep: non-obvious invariants, issue numbers and provenance, constants nobody should tune blindly, diagrams, and enumerated cases the code must not break.",
+      "coverage_note": "AGENTS.md asks to keep comments on constants nobody should tune blindly, but it does not require explaining where tuning numbers, timeouts or z-index values come from or grouping interdependent constants.",
+      "prs": 3,
+      "reviewers": {
+        "mimecuvalo": 2,
+        "frolic": 1
+      },
+      "evidence": [
+        {
+          "pr": 9157,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/src/tla/components/tla-menu/menu.module.css",
+          "url": "https://github.com/tldraw/tldraw/pull/9157#discussion_r3420975093",
+          "quote": "leave a comment on why this z-index is 2 for posterity"
+        },
+        {
+          "pr": 7858,
+          "reviewer": "frolic",
+          "path": "packages/tldraw/src/lib/tools/HandTool/childStates/OneFingerZooming.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/7858#discussion_r3374219192",
+          "quote": "where'd this number come from? should this be % of viewport so we can factor in different device sizes and densities?"
+        },
+        {
+          "pr": 9667,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/sync-worker/src/config.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9667#discussion_r3721180989",
+          "quote": "a lot of the config values seem to be 60_000 — is there an interdependency of these values being around the same value of 60s? if you consolidate the const values to this file it feels like there will be a lot that just say 60s over and over"
+        }
+      ]
+    },
+    {
+      "title": "Remove flags and legacy paths once they are no longer needed",
+      "rule": "Remove feature flags, legacy branches and dead code paths once the feature is live or the code has no remaining users.",
+      "why": "Leftover flags and unused files add branches to reason about and suggest behavior that no longer exists.",
+      "category": "maintainability",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file asks to remove feature flags, legacy branches or dead code paths once they are no longer needed.",
+      "prs": 2,
+      "reviewers": {
+        "MitjaBezensek": 2,
+        "frolic": 1
+      },
+      "evidence": [
+        {
+          "pr": 9001,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/tldraw/src/test/nested-frames-clip-legacy.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9001#discussion_r3512992533",
+          "quote": "I guess this guards a bug that we never shipped? Do we still need this file?"
+        },
+        {
+          "pr": 9418,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/dotcom-shared/src/mutators.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9418#discussion_r3479858765",
+          "quote": "We might clean up some of the `groups_backend` here?"
+        },
+        {
+          "pr": 9418,
+          "reviewer": "frolic",
+          "path": "packages/dotcom-shared/src/mutators.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9418#discussion_r3473877954",
+          "quote": "ooc why is the `groups_backend` flag here still needed?"
+        }
+      ]
+    },
+    {
+      "title": "Expose overridable UI through component slots",
+      "rule": "Expose overridable UI pieces through the existing component slot or configure API (for example CommentingComponents or CommentTool.configure with components) instead of hardcoding them.",
+      "why": "Hardcoded UI forces downstream users to fork the package, and the component-slot pattern is how the SDK is customized.",
+      "category": "api_design",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file asks to expose overridable UI through component slots or configure APIs such as CommentingComponents.",
+      "prs": 2,
+      "reviewers": {
+        "mimecuvalo": 1,
+        "jsscclr": 1
+      },
+      "evidence": [
+        {
+          "pr": 9644,
+          "reviewer": "mimecuvalo",
+          "path": "packages/commenting/src/ui/emoji-picker.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9644#discussion_r3632036012",
+          "quote": "i think we're gonna want this component and related reaction ui components to be swappable via `CommentingComponents`. i very easily can imagine folks wanting to bring in their own emoji picker that has many more emojis (and virtualized lists of emojis since there are so many of …"
+        },
+        {
+          "pr": 9584,
+          "reviewer": "jsscclr",
+          "path": "packages/commenting/src/canvas/comments-overlay.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9584#discussion_r3579240993",
+          "quote": "This is the more tldraw-y way of customisation, right? Can update once this is merged - funny to think of something as deprecated before it's released 😂"
+        }
+      ]
+    },
+    {
+      "title": "Avoid as casts and prefer satisfies or type guards",
+      "rule": "Avoid as casts. Narrow types with guards or use satisfies so the compiler still checks the shape.",
+      "why": "Casts silence the compiler and hide real type mismatches.",
+      "category": "maintainability",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file discourages as casts or recommends satisfies or type guards.",
+      "prs": 2,
+      "reviewers": {
+        "frolic": 2
+      },
+      "evidence": [
+        {
+          "pr": 9290,
+          "reviewer": "frolic",
+          "path": "packages/tldraw/src/lib/ui/context/actions.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9290#discussion_r3434899564",
+          "quote": "is there no other way to narrow this type and avoid the `as any` below?"
+        },
+        {
+          "pr": 9129,
+          "reviewer": "frolic",
+          "path": "packages/dotcom-shared/src/mutators.test.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9129#discussion_r3394972730",
+          "quote": "does `satisfies` work here instead of `as`? I find it generally ~bad to use `as` except in very rare cases where you're sure you want to force the type to a particular shape (not super critical here but more the pattern, to let AI learn good patterns)"
+        }
+      ]
+    },
+    {
+      "title": "Keep app-specific logic out of SDK packages",
+      "rule": "Keep app-specific logic and identifiers out of SDK packages. Expose hooks, meta data or component slots so the host app supplies them.",
+      "why": "SDK code that reads app state, URLs or product identifiers cannot be reused by other hosts.",
+      "category": "architecture",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "`packages/editor` - foundational infinite canvas editor with no default shapes, tools, or UI",
+      "coverage_note": "AGENTS.md separates SDK packages from apps and keeps packages/editor UI-free, but it does not forbid app-specific identifiers, URLs or user data in SDK code or require host-supplied hooks and metadata.",
+      "prs": 2,
+      "reviewers": {
+        "mimecuvalo": 1,
+        "MitjaBezensek": 1
+      },
+      "evidence": [
+        {
+          "pr": 9650,
+          "reviewer": "mimecuvalo",
+          "path": "packages/commenting/src/canvas/comments-overlay.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9650#discussion_r3631100447",
+          "quote": "re-examining this: arguably, we shouldn't be looking at the URL here for actionable parameters — feels leaky on the part of the commenting pkg. it might be better if the SneakyCommentDeepLink handles this all and it's up to the downstream SDK user maybe to handle. thoughts?"
+        },
+        {
+          "pr": 9630,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/commenting/src/ui/comment-author.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9630#discussion_r3614980704",
+          "quote": "Unsure if we should expose color here. Feels like a common enough use case to add it? We could also pass it via the `meta` property for dotcom and then omit it here. I would definitely add meta though. If somebody wants to reuse our `SidebarPanel`, but implement their own `Commen…"
+        }
+      ]
+    },
+    {
+      "title": "Mark only intentional APIs as public",
+      "rule": "Mark only intentionally supported APIs with the public tag, and keep helpers internal or unexported.",
+      "why": "Accidentally public helpers become a compatibility commitment that is hard to undo.",
+      "category": "api_design",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Keep public API changes deliberate and reflected in API reports.",
+      "coverage_note": "AGENTS.md asks for deliberate public API changes but does not say to mark only intended APIs with @public or to keep helpers internal or unexported.",
+      "prs": 2,
+      "reviewers": {
+        "MitjaBezensek": 1,
+        "mimecuvalo": 1
+      },
+      "evidence": [
+        {
+          "pr": 9552,
+          "reviewer": "MitjaBezensek",
+          "path": "packages/editor/src/lib/license/LicenseManager.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9552#discussion_r3557692125",
+          "quote": "Should this be exposed? People might try to mutate things under the hood?"
+        },
+        {
+          "pr": 10505,
+          "reviewer": "mimecuvalo",
+          "path": "packages/editor/src/lib/editor/Editor.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10505#discussion_r3957269424",
+          "quote": "this isn't meant to public - `getCurrentPageShapesInReadingOrder` is the public method"
+        }
+      ]
+    },
+    {
+      "title": "Keep brand names out of translatable strings",
+      "rule": "Pass brand names as interpolated values rather than inline text so they are not translated, and keep the dir prop when swapping components so right-to-left layouts keep working.",
+      "why": "Translators may alter product names, and dropping direction props breaks localized layouts.",
+      "category": "i18n",
+      "checkable_in_diff": true,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "AGENTS.md covers sentence case and proper noun capitalization but says nothing about keeping brand names out of translatable strings or preserving the dir prop when swapping components.",
+      "prs": 2,
+      "reviewers": {
+        "mimecuvalo": 2
+      },
+      "evidence": [
+        {
+          "pr": 9694,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/src/tla/components/dialogs/TlaTldrawOfflineFileDialog.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9694#discussion_r3669634354",
+          "quote": "b/c 'tldraw offline' as an app name/brand name, let's actually prbly pull that out so it doesn't accidentally get translated"
+        },
+        {
+          "pr": 9157,
+          "reviewer": "mimecuvalo",
+          "path": "apps/dotcom/client/src/tla/components/menu-items/menu-items.tsx",
+          "url": "https://github.com/tldraw/tldraw/pull/9157#discussion_r3420967390",
+          "quote": "we shouldn't drop the `dir` prop if at all possible. does this not exist in base-ui?"
+        }
+      ]
+    },
+    {
+      "title": "Find the root cause before adding a guard",
+      "rule": "Investigate how an unexpected value arises before adding a defensive guard, and prefer preventing the invalid state at its source over patching each symptom.",
+      "why": "Guards that hide root causes let the underlying bug persist and make it harder to diagnose.",
+      "category": "maintainability",
+      "checkable_in_diff": false,
+      "coverage": "missing",
+      "documented_in": null,
+      "documented_quote": null,
+      "coverage_note": "No documented file asks agents to find the root cause of unexpected values before adding a defensive guard.",
+      "prs": 2,
+      "reviewers": {
+        "mimecuvalo": 1,
+        "kaneel": 1
+      },
+      "evidence": [
+        {
+          "pr": 9586,
+          "reviewer": "mimecuvalo",
+          "path": "packages/editor/src/lib/utils/normalizeWheel.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9586#discussion_r3589602987",
+          "quote": "wait, how do they get to be non-finite in the first place? do you have a sense of this gets to be like that?"
+        },
+        {
+          "pr": 9260,
+          "reviewer": "kaneel",
+          "path": "packages/tldraw/src/lib/tools/SelectTool/childStates/EditingShape.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/9260#discussion_r3428155188",
+          "quote": "On second thought this is super daft, I still believe the error was here for a reason and we should not be in that state at all, trying to patch all potential errors < trying to prevent these errors from even occuring"
+        }
+      ]
+    },
+    {
+      "title": "Place helpers in the module that owns their concept",
+      "rule": "Place helpers in the shared module that owns their concept (lib/utils or the existing feature file) instead of creating a new file or splitting one concept across two files.",
+      "why": "Scattered helpers are hard to discover, and split concepts force readers to track two places.",
+      "category": "architecture",
+      "checkable_in_diff": true,
+      "coverage": "partial",
+      "documented_in": "AGENTS.md",
+      "documented_quote": "Prefer editing existing files over creating new files.",
+      "coverage_note": "AGENTS.md discourages new files but does not state where helpers belong, such as shared utils versus the owning feature file, or ask agents to avoid splitting one concept across files.",
+      "prs": 2,
+      "reviewers": {
+        "mimecuvalo": 2
+      },
+      "evidence": [
+        {
+          "pr": 8948,
+          "reviewer": "mimecuvalo",
+          "path": "packages/editor/src/lib/editor/tools/cancelShapeCreationOnLongPress.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/8948#discussion_r3465969555",
+          "quote": "nit: for some reason this file feels out of place — i guess let's put it in lib/utils?"
+        },
+        {
+          "pr": 10634,
+          "reviewer": "mimecuvalo",
+          "path": "packages/tldraw/src/lib/ui/hooks/useMenuWheelPassThrough.ts",
+          "url": "https://github.com/tldraw/tldraw/pull/10634#discussion_r3956879852",
+          "quote": "i'd combine this file with `usePassThroughWheelEvents.ts` and avoid having two separate places to consider/know about."
+        }
+      ]
+    }
+  ]
+}
