@@ -1,6 +1,6 @@
 {
   "name": "krill-rules",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Discover the unwritten rules your code reviewers keep asking for, and write them into AGENTS.md / CLAUDE.md.",
   "license": "MIT",
   "repository": {
